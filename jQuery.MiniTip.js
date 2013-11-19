@@ -70,7 +70,7 @@
       $this.data('miniTipId', miniTips.length - 1);
 
       process.call(this);
-      $this.on('input', process);
+      $this.on('input propertychange', process);
     });
   }
 }(jQuery);
