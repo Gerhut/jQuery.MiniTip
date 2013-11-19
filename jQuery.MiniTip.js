@@ -1,7 +1,5 @@
 !function ($) {
-  var miniTips = []
-    , DURATION = 200
-    , $body;
+  var $body;
 
   if (document.body) {
     $body = $('body');
@@ -11,29 +9,14 @@
     });
   }
 
-  function process(event) {
-    var $this = $(this)
-      , miniTip = miniTips[+$this.data('miniTipId')];
+  $.fn.miniTip = $.extend(function (options) {
 
-    if (event && event.type === 'propertychange'
-      && event.originalEvent.propertyName.toLowerCase() !== 'value')
-      return;
-
-    if (parseInt(miniTip.css('margin-top'), 10) > 0 && $this.val().length > 0)
-      miniTip.stop().animate({marginTop: '0'}, DURATION);
-    else if (parseInt(miniTip.css('margin-top'), 10) === 0 && $this.val().length === 0)
-      miniTip.stop().animate({marginTop: $this.css('fontSize')}, DURATION);
-  }
-
-  $.fn.miniTip = function (size, color) {
-
-    if (typeof size === 'string') {
-      color = size;
-      size = 12;
-    } else {
-      size = size || 12;
-      color = color || 'blue'
-    }
+    options = $.extend({
+      size: '12px',
+      color: '#007AFF',
+      blurColor: '#8E8E93'
+    }, options);
+    
     this.filter('input').each(function () {
       var $this = $(this)
         , wrapper, miniTip;
@@ -46,7 +29,7 @@
       wrapper = $('<div>', {
         css: {
           position: 'absolute',
-          height: size + 'px',
+          height: options.size,
           overflow: 'hidden'
         },
         offset: function (offset) {
@@ -60,21 +43,43 @@
       miniTip = $('<p>', {
         text: $this.attr('placeholder'),
         css: {
-          marginTop: size + 'px',
-          color: color,
+          marginTop: options.size,
+          color: options.blurColor,
           backgroundColor: 'white',
-          fontSize: size + 'px'
+          fontSize: options.size
         }
       });
 
       wrapper.append(miniTip);
       $body.append(wrapper);
 
-      miniTips.push(miniTip);
-      $this.data('miniTipId', miniTips.length - 1);
-
       process.call(this);
       $this.on('input propertychange', process);
+      $this.on('focus', focus);
+      $this.on('blur', blur);
+
+      function process(event) {
+        var $this = $(this);
+
+        if (event && event.type === 'propertychange'
+          && event.originalEvent.propertyName.toLowerCase() !== 'value')
+          return;
+
+        if (parseInt(miniTip.css('margin-top'), 10) > 0 && $this.val().length > 0)
+          miniTip.finish().animate({marginTop: '0'}, $.fn.miniTip.duration);
+        else if (parseInt(miniTip.css('margin-top'), 10) === 0 && $this.val().length === 0)
+          miniTip.finish().animate({marginTop: options.size}, $.fn.miniTip.duration);
+      }
+
+      function focus() {
+        miniTip.finish().animate({'color': options.color}, $.fn.miniTip.duration);
+      }
+
+      function blur() {
+        miniTip.finish().animate({'color': options.blurColor}, $.fn.miniTip.duration);
+      }
     });
-  }
+  }, {
+    duration: 200
+  });
 }(jQuery);
