@@ -17,7 +17,7 @@
       blurColor: '#8E8E93'
     }, options);
     
-    this.filter('input').each(function () {
+    this.filter('input, textarea').each(function () {
       var $this = $(this)
         , wrapper, miniTip;
 
