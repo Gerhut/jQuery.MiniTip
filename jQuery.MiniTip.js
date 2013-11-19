@@ -1,5 +1,6 @@
 !function ($) {
   var miniTips = []
+    , DURATION = 200
     , $body;
 
   if (document.body) {
@@ -10,14 +11,18 @@
     });
   }
 
-  function process() {
+  function process(event) {
     var $this = $(this)
       , miniTip = miniTips[+$this.data('miniTipId')];
 
+    if (event && event.type === 'propertychange'
+      && event.originalEvent.propertyName.toLowerCase() !== 'value')
+      return;
+
     if (parseInt(miniTip.css('margin-top'), 10) > 0 && $this.val().length > 0)
-      miniTip.css('margin-top', '0');
+      miniTip.stop().animate({marginTop: '0'}, DURATION);
     else if (parseInt(miniTip.css('margin-top'), 10) === 0 && $this.val().length === 0)
-      miniTip.css('margin-top', '2ex');
+      miniTip.stop().animate({marginTop: $this.css('fontSize')}, DURATION);
   }
 
   $.fn.miniTip = function (size, color) {
@@ -41,7 +46,7 @@
       wrapper = $('<div>', {
         css: {
           position: 'absolute',
-          height: '12px',
+          height: size + 'px',
           overflow: 'hidden'
         },
         offset: function (offset) {
@@ -55,8 +60,7 @@
       miniTip = $('<p>', {
         text: $this.attr('placeholder'),
         css: {
-          transition: 'margin-top 200ms',
-          marginTop: '12px',
+          marginTop: size + 'px',
           color: color,
           backgroundColor: 'white',
           fontSize: size + 'px'
